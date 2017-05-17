@@ -11,7 +11,7 @@
 # $ cp -a /usr/share/easy-rsa/[0-9]/* .
 # $ ./easyrsa init-pki
 # $ ./easyrsa build-ca
-# $ ./easrsa gen-dh
+# $ ./easyrsa gen-dh
 # $ # Where <filename_base> is a regular name like "computer1"
 # $ ./build-server-full <filename_base> [ cmd-opts ]
 # $ ./build-client-full <filename_base> [ cmd-opts ]
