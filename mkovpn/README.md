@@ -1,3 +1,39 @@
+#### Example client output: 
+( the server output doesn't differ greatly ) 
+```
+client
+remote vpn.example.com 1194
+nobind
+;allow-recursive-routing
+explicit-exit-notify 1
+resolv-retry infinite
+proto udp
+dev tun
+persist-key
+persist-tun
+;comp-lzo
+verb 3
+cipher AES-128-CBC
+
+<ca>
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+</ca>
+<cert>
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+</cert>
+<key>
+-----BEGIN RSA PRIVATE KEY-----
+...
+-----END RSA PRIVATE KEY-----
+</key>
+```
+
+#### Some notes about $home_config
+
 Required changes for OpenVPN on EdgeRouter:
 ```diff
 [edit firewall]
