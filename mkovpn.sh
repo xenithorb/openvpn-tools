@@ -17,7 +17,7 @@
 # $ ./build-client-full <filename_base> [ cmd-opts ]
 # $ cd pki
 # $ wget <this script>
-# $ ./mkovpn.sh server vpn.server1.com
+# $ ./mkovpn.sh server vpn.server1.com 10.8.0.1
 # $ ./mkovpn.sh client computer1 vpn.server1.com
 # $ # Now you may distribute the files to your server and client
 #
@@ -28,21 +28,18 @@ out_dir="./ovpn-out"
 
 type="$1"
 cipher="AES-256-GCM"
+# This can be set lower for incompatible older clients, so they don't end up
+# using Blowfish by default (64 bit, insecure)
+cipher="AES-128-CBC"
 ciphers="AES-256-GCM:AES-128-GCM:AES-256-CBC:AES-128-CBC"
 port="1194"
 shift
-
-#check_args() {
-#	local param="$1"
-#	for i in "${args[@]}"; do
-#		[[ "$param" =~ $i ]] && exit 0 || exit 1
-#	done
-#}
 
 name="${1?:ERROR: Need certificate base name}"
 
 if [[ $type == "server" ]]; then
 	server="${1?:ERROR: Need server DNS}"
+	subnet="${2?:ERROR: Need internal VPN subnet address, 10.8.0.0 maybe?}"
 	name="${server}"
 	out_format="${server}.conf"
 elif [[ $type == "client" ]]; then
@@ -74,6 +71,8 @@ CONFIG_CLIENT_ONLY=(
 	"client"
 	"remote ${server} ${port}"
 	"nobind"
+	";allow-recursive-routing"
+	"explicit-exit-notify 1"
 	"resolv-retry infinite"
 )
 
@@ -82,22 +81,20 @@ CONFIG_COMMON=(
 	"dev tun"
 	"persist-key"
 	"persist-tun"
-	"comp-lzo"
+	";comp-lzo"
 	"verb 3"
-	";cipher ${cipher}"
+	"cipher ${cipher}"
 	""
 )
 
 CONFIG_SERVER_ONLY=(
-	"server 10.8.0.0 255.255.255.0"
-	';push "route 192.168.1.0 255.255.255.0"'
-	'push "redirect-gateway def1 bypass-dhcp block-local"'
-	'push "dhcp-option DNS 10.8.0.1"'
+	"server ${subnet} 255.255.255.0"
+	";push \"route 192.168.1.0 255.255.255.0\""
+	"push \"redirect-gateway def1 bypass-dhcp block-local\""
+	"push \"dhcp-option DNS ${subnet%\.*}.1\""
 	"ncp-ciphers ${ciphers}"
-	"cipher ${cipher}"
 	";client-to-client"
 	"mute 10"
-	"explicit-exit-notify 1"
 	"keepalive 5 30"
 )
 
