@@ -35,26 +35,24 @@ reload_dnsmasq() {
 }
 
 up() {
-        local resolv_file="$RESOLV_FILE"
-        local current_resolv="$( cat < "${resolv_file}" )"
+        local current_resolv="$( cat < "${RESOLV_FILE}" )"
         local new_dns="$( export | awk '/dhcp-option DNS/i { sub(/[\"'\'']$/,""); print "nameserver",$NF }' )"
 
         # Backup current resolv.conf
-        echo "${current_resolv}" > "${resolv_file}.bak"
+        echo "${current_resolv}" > "${RESOLV_FILE}.bak"
 
         # Remove nameservers from current resolv.conf.auto and write new dns
         {
                 echo "${current_resolv}" | grep -v "^nameserver";
                 echo "${new_dns}";
-        } > "${resolv_file}"
+        } > "${RESOLV_FILE}"
 
         reload_dnsmasq
 }
 
 down() {
         # Move old resolv.conf.auto back
-        local resolv_file=/tmp/resolv.conf.auto
-        [[ -f ${resolv_file}.bak ]] && mv "${resolv_file}.bak" "${resolv_file}"
+        [[ -f ${RESOLV_FILE}.bak ]] && mv "${RESOLV_FILE}.bak" "${RESOLV_FILE}"
 
         reload_dnsmasq
 }
